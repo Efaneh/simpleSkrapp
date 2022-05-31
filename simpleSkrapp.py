@@ -36,7 +36,7 @@ def createLists(csvFile):
 def cleanFirstName(dictList):
     for i in range(0,len(dictList)):
         firstName = dictList[i].get('First name').replace('-',' ')              #Replaces - with ' '
-        lastName = dictList[i].get('Last name').replace('.',' ') 
+        firstName = firstName.replace('.',' ') 
         firstName = firstName.replace(',',' ')
         firstName = firstName.title()                       #Ensures first letter is capitalised, none others
         firstName = firstName.strip()                       #Removes leading/trailing whitespace                    
@@ -67,6 +67,11 @@ def cleanLastName(dictList, removeNames):
             i -= 1
             length -= 1
             count += 1
+        elif (str.isspace(lastName) or lastName == '' or lastName is None) and removeNames: #Could create some complicated condition for the sake of not repeating code
+            dictList.remove(dictList[i])                                                    #Removes empty surnames
+            i -= 1
+            length -= 1
+            count += 1   
         else:
             lastName = splitName[0]       
             dictList[i].update({'Last name': lastName})
@@ -91,13 +96,13 @@ def cleanDictList(dictList, streamInfo):
     excludedKeys = ['Company Founded','Company Headquarters','Email Status','Location']
     for i in range(0,len(dictList)):
         for j in range (0, len(excludedKeys)):
-            if excludedKeys[j] in dictList[0].keys():
+            if excludedKeys[j] in dictList[i].keys():
                 dictList[i].pop(excludedKeys[j])
     if streamInfo[1]:        
         dictList = trimCompanySizes(dictList, streamInfo[3])    
     if streamInfo[0]:
-        dictList = trimIndustries(dictList, streamInfo[2])
-    dictList = trimOppsAndCustomers(dictList)
+        dictList = trimIndustries(dictList, streamInfo[2])    
+        dictList = trimOppsAndCustomers(dictList)
     return dictList       
 
 def trimOppsAndCustomers(dictList):
@@ -178,18 +183,22 @@ def trimIndustries(dictList, sdrName):
                 
                     
 def createSimpleSkrapp(dictList, fileName):
-    stringToWrite = ''
-    keyList = dictList[0].keys()
-    for key in keyList:
-        stringToWrite += key + ','
-    stringToWrite += 'Contact Source\n'
-    for i in range(0,len(dictList)):
-        count = 0
-        valuesInDict = dictList[i].values()
-        for value in valuesInDict:
-            count =  count+1
-            stringToWrite += '"' + value + '",'
-        stringToWrite += 'Hunter/Skrapp\n'
+    try:
+        stringToWrite = ''
+        keyList = dictList[0].keys()
+        for key in keyList:
+            stringToWrite += key + ','
+        stringToWrite += 'Contact Source\n'
+        for i in range(0,len(dictList)):
+            count = 0
+            valuesInDict = dictList[i].values()
+            for value in valuesInDict:
+                count =  count+1
+                stringToWrite += '"' + value + '",'
+            stringToWrite += 'Hunter/Skrapp\n'
+    except:
+        st.error('It looks like simpleSkrapp has removed EVERY row - have you selected the correct name/banding?')
+        st.stop()
     st.download_button("⬇️ Download File ⬇️",stringToWrite,fileName[:-4] + '_simpleSkrapped.csv')
     return fileName[:-4] + '_simpleSkrapped.csv'
 
@@ -204,7 +213,7 @@ def skrappReport(fileName, fiveOrMore):
         st.write("Rows deleted due to incorrect company banding - " + str(trimCount[0]))
         st.write("Rows deleted due to incorrect industry - " + str(trimCount[1]))
         st.write("Rows deleted due to current Op/Customer - " + str(trimCount[2]))
-        st.write("Rows deleted due to single-letter surname (e.g John F) - " + str(trimCount[3]))
+        st.write("Rows deleted due to single-letter surname or no surname - " + str(trimCount[3]))
         st.write("Don't forget you still have to clean the job titles and double check the file! 😉")
         st.bar_chart(chartData)
         st.write('The following companies have 5 or more leads, take out the least appropirate people!')
@@ -248,7 +257,7 @@ def setupSidebar():
         st.header('simpleSkrapp Options')
         filterIndustries = st.checkbox('Filter by industries', True)
         filterSizes = st.checkbox('Filter by company banding', True)
-        filterNames = st.checkbox('Remove leads with single letter surnames', True)
+        filterNames = st.checkbox('Remove leads with single letter or no surname', True)
         devOptions = st.checkbox('devMode', False)
         if not devOptions:
             hide_menu_style ="""
@@ -291,21 +300,22 @@ def streamlitLogic(streamInfo):
             st.error("Please select your name, banding, and upload a file!")     
 
 def main():
-    try:
-        sdrNames = createNameList()
-        streamInfo = streamlitSetup(sdrNames)
-        dictList = streamlitLogic(streamInfo)
-        if streamInfo[5] and streamInfo[4]:
+    sdrNames = createNameList()
+    streamInfo = streamlitSetup(sdrNames)
+    dictList = streamlitLogic(streamInfo)
+    if streamInfo[5] and streamInfo[4]:
+        try:
             fileName = streamInfo[4].name
             dictList = cleanFirstName(dictList)
             dictList = cleanLastName(dictList, streamInfo[6])
             dictList = cleanDictList(dictList, streamInfo)
             fiveOrMore = checkForRepeats(dictList)
             trueFileName = createSimpleSkrapp(dictList, fileName)
-            skrappReport(trueFileName, fiveOrMore)
-            st.success('Finished!')
-    except:
-        st.error:('An unexpected error occured - Feel free to try again but if this persists contact Efan')
+        except:
+            st.error('There seems to be an issue simplifying your Skrapp - feel free to try again but contact Efan if this persists')
+            st.stop()
+        skrappReport(trueFileName, fiveOrMore)    
+        st.success('Finished!')
     
 if __name__ == '__main__':
     main()
