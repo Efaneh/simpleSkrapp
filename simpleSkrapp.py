@@ -91,7 +91,8 @@ def cleanDictList(dictList, streamInfo):
     excludedKeys = ['Company Founded','Company Headquarters','Email Status','Location']
     for i in range(0,len(dictList)):
         for j in range (0, len(excludedKeys)):
-            dictList[i].pop(excludedKeys[j])
+            if excludedKeys[j] in dictList[0].keys():
+                dictList[i].pop(excludedKeys[j])
     if streamInfo[1]:        
         dictList = trimCompanySizes(dictList, streamInfo[3])    
     if streamInfo[0]:
@@ -133,6 +134,7 @@ def trimCompanySizes(dictList, companySize):
         filteredBands = ['201-500','501-1000','1001-5000']
     elif companySize == 'Enterprise':
         filteredBands = ['5001-10000','10001+']
+    checkForBanding(dictList)
     while i < length:
         if dictList[i].get('Company Size') not in filteredBands:
             dictList.remove(dictList[i])
@@ -142,6 +144,14 @@ def trimCompanySizes(dictList, companySize):
         i += 1
     trimCount[0] = count 
     return dictList
+    
+
+def checkForBanding(dictList):
+    if 'Company Size' not in dictList[0].keys():
+        st.error("It looks like you've deleted the company size column, please untick the \"Filter by company banding\" option!")
+        st.stop()
+    return        
+    
     
 def trimIndustries(dictList, sdrName):
     masterAccList = []
