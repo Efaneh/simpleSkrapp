@@ -304,7 +304,7 @@ def streamlitSetup(sdrNames): #Setting up the frontend with streamlit
         simpleSkrappExplained()
         name = st.selectbox('Please select your name',sdrNames)
         sizeSliderMin, sizeSliderMax = st.select_slider('Please Select the range of company sizes to keep', sliderOptions, value = ('50', '200'))
-        submittedBanding = st.form_submit_button('Update Banding',on_click = sliderChange(sliderOptions, sizeSliderMin, sizeSliderMax))      
+        submittedBanding = st.form_submit_button('🔄 Update Banding 🔄',on_click = sliderChange(sliderOptions, sizeSliderMin, sizeSliderMax))      
     if sizeSliderMin == sizeSliderMax:
         st.error('Please do not pick the same value for the minimum and maxixmum value!')
         st.stop()
