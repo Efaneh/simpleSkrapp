@@ -3,4 +3,8 @@ primaryColor = "#3FE5EF"
 backgroundColor = "#090A0E"
 secondaryBackgroundColor = "#393946"
 textColor = "#FAFAFA"
+<<<<<<< HEAD
 font = "sans-serif"
+=======
+font = "sans-serif"
+>>>>>>> 9bd5474eec3f318067e3f2292643e51db58004d3
