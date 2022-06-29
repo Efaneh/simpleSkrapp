@@ -16,6 +16,7 @@ realLogo = Image.open('realLogo.png')
 stonks = Image.open('stonks.png')
 filterSizes = True
 filterIndustries = True
+bandsToUse = []
        
 def getTopline(csvFile):
     topLine = csvFile.readline()
@@ -113,7 +114,7 @@ def cleanDictList(dictList, streamInfo):
             if excludedKeys[j] in dictList[i].keys(): #If 'Company Founded' for example, is in the csv, delete that row
                 dictList[i].pop(excludedKeys[j])
     if streamInfo[1]:        
-        dictList = trimCompanySizes(dictList, streamInfo[3]) #Trim company sizes based on banding input (Could change variable name)  
+        dictList = trimCompanySizes(dictList) #Trim company sizes based on banding input (Could change variable name)  
     if streamInfo[0]:
         dictList = trimIndustries(dictList, streamInfo[2])   #Trim company sizes based on SDR name assigned industries
         dictList = trimOppsAndCustomers(dictList)            #Trim Open opps and customers based on custom SalesForce report giving domain of open opps/customers 
@@ -128,10 +129,12 @@ def splitLocation(dictList):
         dictList[i]['City'] = ''
         dictList[i]['State'] = ''
         dictList[i]['Country'] = ''
-        location = dictList[i].get('Location')
+        location = dictList[i].get('Location', 'Deleted')
+        if location == 'Deleted':
+            continue
         for country in countryList:
             if country in location:
-                dictList[i]['Country'] = country
+                dictList[i]['Country'] = country 
                 break
         for state in stateListUK:
             if state in location:
@@ -146,8 +149,9 @@ def splitLocation(dictList):
         for city in cityListIreland:
             if city in location:
                 dictList[i]['City'] = city
-                break   
-    print(cityListIreland)            
+                break       
+    if location == 'Deleted':
+        st.error('Note that the location column had been deleted - so all location data will be left blank')
     return dictList
     
 def populateList(string):
@@ -177,22 +181,13 @@ def trimOppsAndCustomers(dictList):
     
       
 
-def trimCompanySizes(dictList, companySize):
-    filteredBands = ['Self-employed','1-10','11-50','51-200','201-500','501-1000','1001-5000','5001-10000','100001+']
+def trimCompanySizes(dictList):
     i = 0
     count = 0
     length = len(dictList)
-    if companySize == 'SME and below':
-        filteredBands = ['1-10','11-50','51-200']
-    elif companySize == 'SME':
-        filteredBands = ['51-200']
-    elif companySize == 'MM':
-        filteredBands = ['201-500','501-1000','1001-5000']
-    elif companySize == 'Enterprise':
-        filteredBands = ['5001-10000','10001+']
     checkForBanding(dictList)
     while i < length:
-        if dictList[i].get('Company Size') not in filteredBands:
+        if dictList[i].get('Company Size') not in bandsToUse:
             dictList.remove(dictList[i])
             i -= 1
             length -= 1
@@ -285,7 +280,20 @@ def createNameList():
             sdrNames.append(line[0]) #Create possible selection of names from sdrAccounts file
     return sorted(sdrNames)
     
+def sliderChange(sliderOptions, sizeSliderMin, sizeSliderMax):   
+    selectedBands = []
+    filteredBands = ['1-10','11-50','51-200','201-500','501-1000','1001-5000','5001-10000','10001+'] 
+    st.write('You are currently keeping the following bands:')
+    for i in range(0,len(sliderOptions)):
+        if int(sliderOptions[i].strip('+')) >= int(sizeSliderMin.strip('+')) and int(sliderOptions[i].strip('+')) <= int(sizeSliderMax.strip('+')):
+            selectedBands.append(i)
+    selectedBands.pop()        
+    for band in selectedBands:
+        bandsToUse.append(filteredBands[band])
+        st.write(filteredBands[band])     
+    
 def streamlitSetup(sdrNames): #Setting up the frontend with streamlit
+    sliderOptions = ['1', '10', '50','200','500','1000','5000','10000','10001+']
     st.set_page_config(page_title = 'simpleSkrapp', page_icon = tabLogo)
     st.title('simpleSkrapp') 
     boolList = setupSidebar()
@@ -295,10 +303,15 @@ def streamlitSetup(sdrNames): #Setting up the frontend with streamlit
         "So please do manually check the csv file after executing!")
         simpleSkrappExplained()
         name = st.selectbox('Please select your name',sdrNames)
-        compSize = st.selectbox('Please enter the company banding:',['SME and below','SME','MM', 'Enterprise'])
+        sizeSliderMin, sizeSliderMax = st.select_slider('Please Select the range of company sizes to keep', sliderOptions, value = ('50', '200'))
+        submittedBanding = st.form_submit_button('Update Banding',on_click = sliderChange(sliderOptions, sizeSliderMin, sizeSliderMax))      
+    if sizeSliderMin == sizeSliderMax:
+        st.error('Please do not pick the same value for the minimum and maxixmum value!')
+        st.stop()
+    with st.form('button'): 
         uploadedFile = st.file_uploader("Choose a file to simpleSkrapp", 'csv')
-        submitted = st.form_submit_button("✨ Simplify! ✨")   
-    return [boolList[0], boolList[1], name, compSize, uploadedFile, submitted, boolList[2]]
+        submitted = st.form_submit_button("✨ Simplify! ✨")         
+    return [boolList[0], boolList[1], name, sizeSliderMin, sizeSliderMax, uploadedFile, submitted, boolList[2]]
     
 def setupSidebar(): #Setting up the frontend with streamlit, top bit removes "Made by streamlit"
     hide_menu_style = """
@@ -343,11 +356,11 @@ def convertFile(uploadedFile): #Making sure correct file encoding is used
     return csvFile
 
 def streamlitLogic(streamInfo): #Controling the flow of the code based on options and submit button
-    if streamInfo[5]: #Whether or not submit button clicked
-        if streamInfo[4] and streamInfo[3] and streamInfo[2]:
+    if streamInfo[6]: #Whether or not submit button clicked
+        if streamInfo[5] and streamInfo[4] and streamInfo[3] and streamInfo[2]:
             with st.spinner('Simplifying your skrapp - please wait'):
                 time.sleep(0.5)
-                csvFile = convertFile(streamInfo[4])
+                csvFile = convertFile(streamInfo[5])
                 dictList = createLists(csvFile)
             return dictList
         else:
@@ -357,11 +370,11 @@ def main(): #Main
     sdrNames = createNameList()
     streamInfo = streamlitSetup(sdrNames)
     dictList = streamlitLogic(streamInfo)
-    if streamInfo[5] and streamInfo[4]:
+    if streamInfo[5] and streamInfo[6]:
         try:
-            fileName = streamInfo[4].name
+            fileName = streamInfo[5].name
             dictList = cleanFirstName(dictList)
-            dictList = cleanLastName(dictList, streamInfo[6])
+            dictList = cleanLastName(dictList, streamInfo[7])
             dictList = cleanDictList(dictList, streamInfo)
             fiveOrMore = checkForRepeats(dictList)
             trueFileName = createSimpleSkrapp(dictList, fileName, streamInfo[2])
