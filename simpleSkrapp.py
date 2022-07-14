@@ -116,8 +116,8 @@ def cleanDictList(dictList, streamInfo):
     if streamInfo[1]:        
         dictList = trimCompanySizes(dictList) #Trim company sizes based on banding input (Could change variable name)  
     if streamInfo[0]:
-        dictList = trimIndustries(dictList, streamInfo[2])   #Trim company sizes based on SDR name assigned industries
-        dictList = trimOppsAndCustomers(dictList)            #Trim Open opps and customers based on custom SalesForce report giving domain of open opps/customers 
+        dictList = trimIndustries(dictList, streamInfo[2])         #Trim company sizes based on SDR name assigned industries
+    dictList = trimOppsAndCustomers(dictList)            #Trim Open opps and customers based on custom SalesForce report giving domain of open opps/customers 
     return dictList                                          #Consider a way to export this csv automatically once per day to github repo.
 
 def splitLocation(dictList):
@@ -164,7 +164,7 @@ def trimOppsAndCustomers(dictList):
     count = 0
     j = 0
     with open('customerListClean.csv', 'r', encoding='utf-8') as file:
-        customerListDict = createLists(file)
+        customerListDict = createLists(file)    
     customerWebsiteList = []
     for i in range (0, len(customerListDict)):
         customerWebsiteList.append(customerListDict[i].get("Domain"))  #Create list of domains to match
