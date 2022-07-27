@@ -1,5 +1,4 @@
 import streamlit as st 
-import pandas as pd
 import csv
 from PIL import Image
 import time
@@ -115,7 +114,7 @@ def cleanDictList(dictList, streamInfo):
         dictList = trimCompanySizes(dictList) #Trim company sizes based on banding input (Could change variable name)  
     if streamInfo[0]:
         dictList = trimIndustries(dictList, streamInfo[2])         #Trim company sizes based on SDR name assigned industries
-    dictList = trimOppsAndCustomers(dictList)            #Trim Open opps and customers based on custom SalesForce report giving domain of open opps/customers 
+    #dictList = trimOppsAndCustomers(dictList)            #Trim Open opps and customers based on custom SalesForce report giving domain of open opps/customers 
     return dictList                                          #Consider a way to export this csv automatically once per day to github repo.
 
 def splitLocation(dictList):
@@ -162,10 +161,7 @@ def trimOppsAndCustomers(dictList):
     count = 0
     j = 0
     s = sharepy.connect('kalliduslimited.sharepoint.com', 'efan.haynes@kallidus.com','clxnqltcptcvkhvg')
-    try:
-        string = s.get('https://kalliduslimited.sharepoint.com/sites/Sales/Shared%20Documents/Apps/currentCustomers.xlsx')
-    except:
-        st.write(string)
+    string = s.get('https://kalliduslimited.sharepoint.com/sites/Sales/Shared%20Documents/Apps/currentCustomers.xlsx')
     f = io.BytesIO(string.content)
     dataFrame = pd.read_excel(f)
     urlList = dataFrame.values.tolist() 
