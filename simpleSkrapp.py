@@ -8,6 +8,9 @@ import re
 from PIL import Image
 import time
 import io
+import sharepy
+import io
+import pandas as pd
 
 
 trimCount = [0,0,0,0]
@@ -163,11 +166,14 @@ def populateList(string):
 def trimOppsAndCustomers(dictList):
     count = 0
     j = 0
-    with open('customerListClean.csv', 'r', encoding='utf-8') as file:
-        customerListDict = createLists(file)    
+    s = sharepy.connect('kalliduslimited.sharepoint.com', 'efan.haynes@kallidus.com','clxnqltcptcvkhvg')
+    string = s.get('https://kalliduslimited.sharepoint.com/sites/Sales/Shared%20Documents/Apps/currentCustomers.xlsx')
+    f = io.BytesIO(string.content)
+    dataFrame = pd.read_excel(f)
+    urlList = dataFrame.values.tolist() 
     customerWebsiteList = []
-    for i in range (0, len(customerListDict)):
-        customerWebsiteList.append(customerListDict[i].get("Domain"))  #Create list of domains to match
+    for url in urlList:
+        customerWebsiteList.append(url[1])  #Create list of domains to match
     length = len(dictList)
     while j < length:
         if dictList[j].get('Company URL') in customerWebsiteList: #If there's a match, remove
@@ -260,7 +266,6 @@ def skrappReport(fileName, fiveOrMore):
         st.write('The tool is now finished! A new file ' + fileName + ' has been created for you and can be downloaded above.')
         st.write("Note that the deletion is done in this order, so if a row has the wrong banding AND industry it will only count towards banding for the sake of stats.")
         st.write("Rows deleted due to incorrect company banding - " + str(trimCount[0]))
-        st.write("Rows deleted due to incorrect industry - " + str(trimCount[1]))
         st.write("Rows deleted due to current Op/Customer - " + str(trimCount[2]))
         st.write("Rows deleted due to single-letter surname or no surname - " + str(trimCount[3]))
         st.write("Don't forget you still have to clean the job titles and double check the file! 😉")
@@ -300,7 +305,8 @@ def streamlitSetup(sdrNames): #Setting up the frontend with streamlit
     with st.form('parameters'):
         st.write("Welcome to simpleSkrapp 😊! This tool was made by Efan Haynes to automate some aspects of the "
         "Skrapp process.\n\nIt has not been tested for every possibility " 
-        "So please do manually check the csv file after executing!")
+        "So please do manually check the csv file after executing!\n\nGiven the LinkedIn changes to industries, and the fact we now SalesNav Search our"
+        " account lists, the filter by industry option has been removed, however please still select your name to ensure the correct SalesLoft owner")
         simpleSkrappExplained()
         name = st.selectbox('Please select your name',sdrNames)
         sizeSliderMin, sizeSliderMax = st.select_slider('Please Select the range of company sizes to keep', sliderOptions, value = ('50', '200'))
@@ -322,7 +328,7 @@ def setupSidebar(): #Setting up the frontend with streamlit, top bit removes "Ma
     with st.sidebar:
         st.image(realLogo, caption='An extremely original logo')
         st.header('simpleSkrapp Options')
-        filterIndustries = st.checkbox('Filter by industries', True)
+        filterIndustries = False
         filterSizes = st.checkbox('Filter by company banding', True)
         filterNames = st.checkbox('Remove leads with single letter or no surname', True)
         devOptions = st.checkbox('devMode', False)
@@ -344,7 +350,7 @@ def simpleSkrappExplained(): #Text displayed what it does
         st.write('simpleSkrapp is a place where you can upload the csv files you get from skrapp, and have them cleaned for you!')
         st.header('What can it do?')
         st.markdown('So far, it currently:\n - Deletes and inserts columns to the csv as necessary\n - Cleans the prospects first and last name\n'
-                    '- Removes any rows that are outside of your allocated industries and selected banding\n - Removes any rows that are current customers'
+                    '- Removes any rows that are current customers\n - Removes any companies outside the selected banding\n - Takes the location information from Skrapp and enters it in a manner SalesLoft understands'
                     ' \n - Removes any prospects with a single digit surname \n - Lets you know if there are more than 5 entries from a single company')
         st.header('What can it not do?')            
         st.markdown('- Clean job titles! People like to call themselves all sorts of things, so I\'m afraid that\'s still your job!')
