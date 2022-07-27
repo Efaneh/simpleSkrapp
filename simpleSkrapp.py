@@ -381,6 +381,7 @@ def main(): #Main
             fileName = streamInfo[5].name
             dictList = cleanFirstName(dictList)
             dictList = cleanLastName(dictList, streamInfo[7])
+            st.write("Here")
             dictList = cleanDictList(dictList, streamInfo)
             fiveOrMore = checkForRepeats(dictList)
             trueFileName = createSimpleSkrapp(dictList, fileName, streamInfo[2])
