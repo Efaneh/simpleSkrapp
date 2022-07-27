@@ -1,15 +1,10 @@
 import streamlit as st 
 import pandas as pd
-import numpy as np
-import sys
-import os
 import csv
-import re
 from PIL import Image
 import time
 import io
 import sharepy
-import io
 import pandas as pd
 
 
@@ -166,10 +161,12 @@ def populateList(string):
 def trimOppsAndCustomers(dictList):
     count = 0
     j = 0
+    st.write("Here")
     s = sharepy.connect('kalliduslimited.sharepoint.com', 'efan.haynes@kallidus.com','clxnqltcptcvkhvg')
     string = s.get('https://kalliduslimited.sharepoint.com/sites/Sales/Shared%20Documents/Apps/currentCustomers.xlsx')
     f = io.BytesIO(string.content)
     dataFrame = pd.read_excel(f)
+    st.write("Here2")
     urlList = dataFrame.values.tolist() 
     customerWebsiteList = []
     for url in urlList:
@@ -381,7 +378,6 @@ def main(): #Main
             fileName = streamInfo[5].name
             dictList = cleanFirstName(dictList)
             dictList = cleanLastName(dictList, streamInfo[7])
-            st.write("Here")
             dictList = cleanDictList(dictList, streamInfo)
             fiveOrMore = checkForRepeats(dictList)
             trueFileName = createSimpleSkrapp(dictList, fileName, streamInfo[2])
