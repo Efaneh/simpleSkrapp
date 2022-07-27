@@ -163,10 +163,10 @@ def trimOppsAndCustomers(dictList):
     j = 0
     st.write("Here")
     s = sharepy.connect('kalliduslimited.sharepoint.com', 'efan.haynes@kallidus.com','clxnqltcptcvkhvg')
+    st.write("Here2")
     string = s.get('https://kalliduslimited.sharepoint.com/sites/Sales/Shared%20Documents/Apps/currentCustomers.xlsx')
     f = io.BytesIO(string.content)
     dataFrame = pd.read_excel(f)
-    st.write("Here2")
     urlList = dataFrame.values.tolist() 
     customerWebsiteList = []
     for url in urlList:
