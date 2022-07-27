@@ -1,2 +1,2 @@
-pandas
-sharepy
+pandas==1.4.3
+sharepy==2.0.0
