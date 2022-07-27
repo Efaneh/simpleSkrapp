@@ -161,10 +161,11 @@ def populateList(string):
 def trimOppsAndCustomers(dictList):
     count = 0
     j = 0
-    st.write("Here")
     s = sharepy.connect('kalliduslimited.sharepoint.com', 'efan.haynes@kallidus.com','clxnqltcptcvkhvg')
-    st.write("Here2")
-    string = s.get('https://kalliduslimited.sharepoint.com/sites/Sales/Shared%20Documents/Apps/currentCustomers.xlsx')
+    try:
+        string = s.get('https://kalliduslimited.sharepoint.com/sites/Sales/Shared%20Documents/Apps/currentCustomers.xlsx')
+    except:
+        st.write(string)
     f = io.BytesIO(string.content)
     dataFrame = pd.read_excel(f)
     urlList = dataFrame.values.tolist() 
