@@ -373,12 +373,12 @@ def main(): #Main
     dictList = streamlitLogic(streamInfo)
     if streamInfo[5] and streamInfo[6]:
         try:
-        fileName = streamInfo[5].name
-        dictList = cleanFirstName(dictList)
-        dictList = cleanLastName(dictList, streamInfo[7])
-        dictList = cleanDictList(dictList, streamInfo)
-        fiveOrMore = checkForRepeats(dictList)
-        trueFileName = createSimpleSkrapp(dictList, fileName, streamInfo[2])
+            fileName = streamInfo[5].name
+            dictList = cleanFirstName(dictList)
+            dictList = cleanLastName(dictList, streamInfo[7])
+            dictList = cleanDictList(dictList, streamInfo)
+            fiveOrMore = checkForRepeats(dictList)
+            trueFileName = createSimpleSkrapp(dictList, fileName, streamInfo[2])
         except:
             st.error('There seems to be an issue simplifying your Skrapp - feel free to try again but contact Efan if this persists')
             st.stop()
