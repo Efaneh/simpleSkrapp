@@ -1,1 +1,3 @@
 sharepy
+openpyxl
+pandas
