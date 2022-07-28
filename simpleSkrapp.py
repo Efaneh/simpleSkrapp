@@ -323,7 +323,7 @@ def setupSidebar(): #Setting up the frontend with streamlit, top bit removes "Ma
         st.image(realLogo, caption='An extremely original logo')
         st.header('simpleSkrapp Options')
         filterIndustries = False
-        filterSizes = st.checkbox('Filter by company banding', True)
+        filterSizes = st.checkbox('Filter by company banding', False, disabled = True)
         filterNames = st.checkbox('Remove leads with single letter or no surname', True)
         devOptions = st.checkbox('devMode', False)
         if not devOptions: #Gives option to go into streamlit options (Mainly for me to play around with when testing)
