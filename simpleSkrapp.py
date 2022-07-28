@@ -114,7 +114,7 @@ def cleanDictList(dictList, streamInfo):
         dictList = trimCompanySizes(dictList) #Trim company sizes based on banding input (Could change variable name)  
     if streamInfo[0]:
         dictList = trimIndustries(dictList, streamInfo[2])         #Trim company sizes based on SDR name assigned industries
-    #dictList = trimOppsAndCustomers(dictList)            #Trim Open opps and customers based on custom SalesForce report giving domain of open opps/customers 
+    dictList = trimOppsAndCustomers(dictList)            #Trim Open opps and customers based on custom SalesForce report giving domain of open opps/customers 
     return dictList                                          #Consider a way to export this csv automatically once per day to github repo.
 
 def splitLocation(dictList):
@@ -304,7 +304,7 @@ def streamlitSetup(sdrNames): #Setting up the frontend with streamlit
         simpleSkrappExplained()
         name = st.selectbox('Please select your name',sdrNames)
         sizeSliderMin, sizeSliderMax = st.select_slider('Please Select the range of company sizes to keep', sliderOptions, value = ('50', '200'))
-        submittedBanding = st.form_submit_button('🔄 Update Banding 🔄',on_click = sliderChange(sliderOptions, sizeSliderMin, sizeSliderMax))      
+        submittedBanding = st.form_submit_button('🔄 Update Banding & Name 🔄',on_click = sliderChange(sliderOptions, sizeSliderMin, sizeSliderMax))      
     if sizeSliderMin == sizeSliderMax:
         st.error('Please do not pick the same value for the minimum and maxixmum value!')
         st.stop()
@@ -371,16 +371,16 @@ def main(): #Main
     streamInfo = streamlitSetup(sdrNames)
     dictList = streamlitLogic(streamInfo)
     if streamInfo[5] and streamInfo[6]:
-        try:
-            fileName = streamInfo[5].name
-            dictList = cleanFirstName(dictList)
-            dictList = cleanLastName(dictList, streamInfo[7])
-            dictList = cleanDictList(dictList, streamInfo)
-            fiveOrMore = checkForRepeats(dictList)
-            trueFileName = createSimpleSkrapp(dictList, fileName, streamInfo[2])
-        except:
-            st.error('There seems to be an issue simplifying your Skrapp - feel free to try again but contact Efan if this persists')
-            st.stop()
+        #try:
+        fileName = streamInfo[5].name
+        dictList = cleanFirstName(dictList)
+        dictList = cleanLastName(dictList, streamInfo[7])
+        dictList = cleanDictList(dictList, streamInfo)
+        fiveOrMore = checkForRepeats(dictList)
+        trueFileName = createSimpleSkrapp(dictList, fileName, streamInfo[2])
+        #except:
+         #   st.error('There seems to be an issue simplifying your Skrapp - feel free to try again but contact Efan if this persists')
+          #  st.stop()
         skrappReport(trueFileName, fiveOrMore)    
         st.success('Finished!')
     
