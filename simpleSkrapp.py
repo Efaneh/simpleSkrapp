@@ -161,7 +161,7 @@ def populateList(string):
 def trimOppsAndCustomers(dictList):
     count = 0
     j = 0
-    s = sharepy.connect('kalliduslimited.sharepoint.com', 'efan.haynes@kallidus.com','clxnqltcptcvkhvg')
+    s = sharepy.connect('kalliduslimited.sharepoint.com', 'dominic.macias@kallidus.com','khbwplgcsfmrcvbj')
     string = s.get('https://kalliduslimited.sharepoint.com/sites/Sales/Shared%20Documents/Apps/currentCustomers.xlsx')
     f = io.BytesIO(string.content)
     dataFrame = pd.read_excel(f)
@@ -330,6 +330,7 @@ def setupSidebar(): #Setting up the frontend with streamlit, top bit removes "Ma
         st.header('simpleSkrapp Options')
         filterIndustries = False
         filterSizes = st.checkbox('Filter by company banding', False, disabled = True)
+        filterNames = st.checkbox('Remove leads with single letter or no surname', True)
         filterNames = st.checkbox('Remove leads with single letter or no surname', True)
         devOptions = st.checkbox('devMode', False)
         if not devOptions: #Gives option to go into streamlit options (Mainly for me to play around with when testing)
