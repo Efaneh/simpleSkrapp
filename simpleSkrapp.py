@@ -331,7 +331,6 @@ def setupSidebar(): #Setting up the frontend with streamlit, top bit removes "Ma
         filterIndustries = False
         filterSizes = st.checkbox('Filter by company banding', False, disabled = True)
         filterNames = st.checkbox('Remove leads with single letter or no surname', True)
-        filterNames = st.checkbox('Remove leads with single letter or no surname', True)
         devOptions = st.checkbox('devMode', False)
         if not devOptions: #Gives option to go into streamlit options (Mainly for me to play around with when testing)
             hide_menu_style ="""
